@@ -1,22 +1,23 @@
 #Requires AutoHotkey v2.0+
 #SingleInstance Force
 
-; ========================================================
+; ===========================================================
 ; AltGr "arrow layer" for ease of use with touch typing
-; Compatível with other modifiers like Shift or Ctrl
-; ========================================================
+; Compatible with other modifiers like Shift or Ctrl and Alt
+; ===========================================================
 
-; Ignores LCtrl becaues AltGr works by pressing LCtrl virtually
 sendNav(keyBase) {
     isShift := GetKeyState("Shift", "P")
-    isRCtrl := GetKeyState("RCtrl", "P")  ; <- only RCtrl
+    isRCtrl := GetKeyState("RCtrl", "P")
+    isLAlt  := GetKeyState("LAlt", "P")
 
     mods := ""
     if isShift
         mods .= "+"
     if isRCtrl
         mods .= "^"
-
+    if isLAlt
+        mods .= "!"
     Send(mods "{" keyBase "}")
 }
 
