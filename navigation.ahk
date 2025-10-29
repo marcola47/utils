@@ -2,8 +2,8 @@
 #SingleInstance Force
 
 ; ===========================================================
-; AltGr "arrow layer" for ease of use with touch typing
-; Compatible with other modifiers like Shift or Ctrl and Alt
+; AltGr navigation layer for ease of use with touch typing
+; Compatible with other modifiers like Shift, Ctrl and Alt
 ; ===========================================================
 
 sendNav(keyBase) {
