@@ -35,7 +35,7 @@ RAlt & o:: sendNav("End")
 
 ; ===========================================================
 ; AltGr symbols: [, ], / with Shift selecting {, }, ?
-; Ctrl/Alt modifiers are preserved; Shift is handled by the chosen char
+; Ctrl/Alt modifiers are preserved; Shift é decidido pelo caractere
 ; ===========================================================
 
 sendSym(baseChar, shiftedChar) {
@@ -44,7 +44,7 @@ sendSym(baseChar, shiftedChar) {
     isLAlt  := GetKeyState("LAlt", "P")
 
     mods := ""
-    ; Preserve Ctrl/Alt so ^/ and !/ etc. work, but don't add Shift here
+    ; Preserva Ctrl/Alt (ex.: ^/ e !/); não adiciona Shift aqui
     if isRCtrl
         mods .= "^"
     if isLAlt
@@ -52,20 +52,40 @@ sendSym(baseChar, shiftedChar) {
 
     char := isShift ? shiftedChar : baseChar
 
-    ; Escape literal braces for Send()
+    ; Escapar chaves literais
     if (char = "{")
         char := "{{}"
     else if (char = "}")
         char := "{}}"
+    ; Escapar literais especiais do Send: + ^ ! #
+    else if (char = "+")
+        char := "{+}"
+    else if (char = "^")
+        char := "{^}"
+    else if (char = "!")
+        char := "{!}"
+    else if (char = "#")
+        char := "{#}"
 
     Send(mods char)
 }
 
-; AltGr + , -> [ and {
+; AltGr + , -> [ e { (com Shift)
 RAlt & ,:: sendSym("[", "{")
 
-; AltGr + . -> ] and }
+; AltGr + . -> ] e } (com Shift)
 RAlt & .:: sendSym("]", "}")
 
-; AltGr + m -> / and ?
+; AltGr + m -> / e ?
 RAlt & m:: sendSym("/", "?")
+
+; AltGr + b -> - and _
+RAlt & b:: sendSym("-", "_")
+
+; AltGr + n -> = and +
+RAlt & n:: sendSym("=", "+")
+
+; I could add another symbol in the shift modifier
+; AltGr + d/f -> (/)
+RAlt & d:: sendSym("(", "(")
+RAlt & f:: sendSym(")", ")")
