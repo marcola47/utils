@@ -44,7 +44,6 @@ sendSym(baseChar, shiftedChar) {
     isLAlt  := GetKeyState("LAlt", "P")
 
     mods := ""
-    ; Preserva Ctrl/Alt (ex.: ^/ e !/); não adiciona Shift aqui
     if isRCtrl
         mods .= "^"
     if isLAlt
@@ -52,12 +51,10 @@ sendSym(baseChar, shiftedChar) {
 
     char := isShift ? shiftedChar : baseChar
 
-    ; Escapar chaves literais
     if (char = "{")
         char := "{{}"
     else if (char = "}")
         char := "{}}"
-    ; Escapar literais especiais do Send: + ^ ! #
     else if (char = "+")
         char := "{+}"
     else if (char = "^")
