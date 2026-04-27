@@ -32,6 +32,7 @@ RAlt & h:: sendNav("PgDn")
 
 RAlt & u:: sendNav("Home")
 RAlt & o:: sendNav("End")
+RAlt & Space:: Send("{Space}")
 
 ; ===========================================================
 ; AltGr symbols: [, ], / with Shift selecting {, }, ?
