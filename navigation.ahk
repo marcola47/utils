@@ -36,7 +36,7 @@ RAlt & Space:: Send("{Space}")
 
 ; ===========================================================
 ; AltGr symbols: [, ], / with Shift selecting {, }, ?
-; Ctrl/Alt modifiers are preserved; Shift é decidido pelo caractere
+; Ctrl/Alt modifiers are preserved
 ; ===========================================================
 
 sendSym(baseChar, shiftedChar) {
@@ -68,13 +68,13 @@ sendSym(baseChar, shiftedChar) {
     Send(mods char)
 }
 
-; AltGr + , -> [ e { (com Shift)
+; AltGr + , -> [ and { (with Shift)
 RAlt & ,:: sendSym("[", "{")
 
-; AltGr + . -> ] e } (com Shift)
+; AltGr + . -> ] and } (with Shift)
 RAlt & .:: sendSym("]", "}")
 
-; AltGr + m -> / e ?
+; AltGr + m -> / and ?
 RAlt & m:: sendSym("/", "?")
 
 ; AltGr + b -> - and _
