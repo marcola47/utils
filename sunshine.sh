@@ -154,26 +154,14 @@ fi
 info "Sunshine binary: ${SUNSHINE_BIN}"
 
 # ------------------------------------------------------------
-# 3. Sunshine uinput permissions
-# ------------------------------------------------------------
-#
-# Sunshine's official package installs and manages its own
-# udev rules. No custom Sunshine udev rule is created here.
-#
-
-success "Using Sunshine's packaged udev/input configuration."
-
-# ------------------------------------------------------------
-# 4. Configure LightDM automatic login
+# 3. Configure LightDM automatic login
 # ------------------------------------------------------------
 
 LIGHTDM_DIR="/etc/lightdm/lightdm.conf.d"
 
 if command -v lightdm >/dev/null 2>&1 || [[ -d /etc/lightdm ]]; then
     info "Configuring LightDM automatic login..."
-
     sudo mkdir -p "${LIGHTDM_DIR}"
-
     sudo tee "${LIGHTDM_DIR}/50-sunshine-autologin.conf" >/dev/null <<EOF
 [Seat:*]
 autologin-user=${USER}
@@ -187,13 +175,11 @@ else
 fi
 
 # ------------------------------------------------------------
-# 5. Configure systemd-logind lid behavior
+# 4. Configure systemd-logind lid behavior
 # ------------------------------------------------------------
 
 info "Configuring closed-lid behavior..."
-
 sudo mkdir -p /etc/systemd/logind.conf.d
-
 sudo tee /etc/systemd/logind.conf.d/50-sunshine-lid.conf >/dev/null <<'EOF'
 [Login]
 HandleLidSwitch=ignore
@@ -204,7 +190,7 @@ EOF
 success "Laptop will ignore lid-close events."
 
 # ------------------------------------------------------------
-# 6. Configure XFCE power management
+# 5. Configure XFCE power management
 # ------------------------------------------------------------
 
 info "Configuring XFCE power management..."
@@ -276,17 +262,15 @@ xfconf-query \
 success "XFCE automatic sleep/DPMS disabled while on AC."
 
 # ------------------------------------------------------------
-# 7. Enable Sunshine systemd user service
+# 6. Enable Sunshine systemd user service
 # ------------------------------------------------------------
 
 info "Enabling Sunshine systemd user service..."
-
 systemctl --user --now enable app-dev.lizardbyte.app.Sunshine
-
 success "Sunshine systemd user service enabled and started."
 
 # ------------------------------------------------------------
-# 8. Final status
+# 7. Final status
 # ------------------------------------------------------------
 
 echo
