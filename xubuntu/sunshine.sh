@@ -49,35 +49,24 @@ info "User: ${USER}"
 info "OS: ${PRETTY_NAME:-unknown}"
 
 # ------------------------------------------------------------
-# Packages
-# ------------------------------------------------------------
-
-info "Installing required packages..."
-
-sudo apt update
-
-sudo apt install -y \
-    curl \
-    ca-certificates \
-    udev \
-    xfconf \
-    ufw \
-    lightdm
-
-success "Required packages installed."
-
-# ------------------------------------------------------------
 # Sunshine
 # ------------------------------------------------------------
 
 if command -v sunshine >/dev/null 2>&1; then
     success "Sunshine is already installed."
 else
-    info "Adding the official LizardByte repository..."
+    repo_file="/etc/apt/sources.list.d/lizardbyte-stable.list"
+    keyring_file="/usr/share/keyrings/lizardbyte-stable-archive-keyring.gpg"
+    trusted_key_file="/etc/apt/trusted.gpg.d/lizardbyte-stable.gpg"
 
-    curl -1sLf \
-        'https://dl.cloudsmith.io/public/lizardbyte/stable/cfg/setup/bash.deb.sh' |
-        sudo -E bash
+    if [[ ! -s "$repo_file" || ( ! -s "$keyring_file" && ! -s "$trusted_key_file" ) ]]; then
+        info "Adding the official LizardByte repository..."
+        sudo rm -f "$keyring_file"
+
+        curl -1sLf \
+            'https://dl.cloudsmith.io/public/lizardbyte/stable/cfg/setup/bash.deb.sh' |
+            sudo -E bash
+    fi
 
     sudo apt update
     sudo apt install -y sunshine
