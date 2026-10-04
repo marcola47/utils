@@ -12,7 +12,8 @@ sudo apt install -y \
     xfconf \
     ufw \
     lightdm \
-    util-linux-extra
+    util-linux-extra \
+    ripgrep
 
 for file in "$script_dir"/*.sh; do
     [[ -f "$file" ]] || continue
