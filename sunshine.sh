@@ -118,7 +118,8 @@ sudo apt update
 sudo apt install -y \
     curl \
     ca-certificates \
-    udev
+    udev \
+    dbus-user-session
 
 success "Required packages installed."
 
