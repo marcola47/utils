@@ -5,7 +5,6 @@
 #
 # What this script does:
 #   - Installs Sunshine from the official LizardByte repository
-#   - Configures Sunshine/uinput permissions
 #   - Enables automatic LightDM login for the current user
 #   - Configures the laptop to ignore lid-close events
 #   - Disables XFCE automatic suspend/DPMS while plugged in
@@ -119,7 +118,8 @@ sudo apt install -y \
     curl \
     ca-certificates \
     udev \
-    dbus-user-session
+    dbus-user-session \
+    xfconf
 
 success "Required packages installed."
 
@@ -154,34 +154,17 @@ fi
 info "Sunshine binary: ${SUNSHINE_BIN}"
 
 # ------------------------------------------------------------
-# 3. Configure uinput permissions
+# 3. Sunshine uinput permissions
 # ------------------------------------------------------------
+#
+# Sunshine's official package installs and manages its own
+# udev rules. No custom Sunshine udev rule is created here.
+#
 
-info "Configuring Sunshine virtual input permissions..."
-
-sudo tee /etc/udev/rules.d/85-sunshine.rules >/dev/null <<'EOF'
-KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
-EOF
-
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-
-success "uinput permissions configured."
+success "Using Sunshine's packaged udev/input configuration."
 
 # ------------------------------------------------------------
-# 4. Add user to input group
-# ------------------------------------------------------------
-
-if getent group input >/dev/null 2>&1; then
-    info "Adding ${USER} to the input group..."
-    sudo usermod -aG input "${USER}"
-    success "User added to input group."
-else
-    warn "The 'input' group does not exist. Skipping."
-fi
-
-# ------------------------------------------------------------
-# 5. Configure LightDM automatic login
+# 4. Configure LightDM automatic login
 # ------------------------------------------------------------
 
 LIGHTDM_DIR="/etc/lightdm/lightdm.conf.d"
@@ -204,7 +187,7 @@ else
 fi
 
 # ------------------------------------------------------------
-# 6. Configure systemd-logind lid behavior
+# 5. Configure systemd-logind lid behavior
 # ------------------------------------------------------------
 
 info "Configuring closed-lid behavior..."
@@ -221,40 +204,79 @@ EOF
 success "Laptop will ignore lid-close events."
 
 # ------------------------------------------------------------
-# 7. Configure XFCE power management
+# 6. Configure XFCE power management
 # ------------------------------------------------------------
 
 info "Configuring XFCE power management..."
 
-XFCE_POWER_DIR="${HOME}/.config/xfce4/xfconf/xfce-perchannel-xml"
-XFCE_POWER_FILE="${XFCE_POWER_DIR}/xfce4-power-manager.xml"
-
-mkdir -p "${XFCE_POWER_DIR}"
-
-if [[ -f "${XFCE_POWER_FILE}" ]]; then
-    cp "${XFCE_POWER_FILE}" \
-       "${XFCE_POWER_FILE}.sunshine-backup.$(date +%Y%m%d-%H%M%S)"
+if ! command -v xfconf-query >/dev/null 2>&1; then
+    die "xfconf-query was not found. Is XFCE/Xubuntu installed correctly?"
 fi
 
-cat > "${XFCE_POWER_FILE}" <<'EOF'
-<?xml version="1.1" encoding="UTF-8" ?>
+# Disable inactivity action while on AC.
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/inactivity-on-ac \
+    -n -t int -s 0 2>/dev/null || \
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/inactivity-on-ac \
+    -s 0
 
-<channel name="xfce4-power-manager" version="1.0">
-  <property name="xfce4-power-manager" type="empty">
-    <property name="inactivity-on-ac" type="int" value="0"/>
-    <property name="dpms-enabled" type="bool" value="false"/>
-    <property name="blank-on-ac" type="int" value="0"/>
-    <property name="dpms-on-ac-sleep" type="int" value="0"/>
-    <property name="dpms-on-ac-off" type="int" value="0"/>
-    <property name="lid-action-on-ac" type="uint" value="0"/>
-  </property>
-</channel>
-EOF
+# Disable DPMS.
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/dpms-enabled \
+    -n -t bool -s false 2>/dev/null || \
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/dpms-enabled \
+    -s false
 
-success "XFCE automatic sleep/DPMS disabled."
+# Disable display blanking while on AC.
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/blank-on-ac \
+    -n -t int -s 0 2>/dev/null || \
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/blank-on-ac \
+    -s 0
+
+# Disable DPMS sleep while on AC.
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/dpms-on-ac-sleep \
+    -n -t int -s 0 2>/dev/null || \
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/dpms-on-ac-sleep \
+    -s 0
+
+# Disable DPMS off while on AC.
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/dpms-on-ac-off \
+    -n -t int -s 0 2>/dev/null || \
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/dpms-on-ac-off \
+    -s 0
+
+# Ignore lid action while on AC.
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/lid-action-on-ac \
+    -n -t uint -s 0 2>/dev/null || \
+xfconf-query \
+    -c xfce4-power-manager \
+    -p /xfce4-power-manager/lid-action-on-ac \
+    -s 0
+
+success "XFCE automatic sleep/DPMS disabled while on AC."
 
 # ------------------------------------------------------------
-# 8. Enable Sunshine systemd user service
+# 7. Enable Sunshine systemd user service
 # ------------------------------------------------------------
 
 info "Enabling Sunshine systemd user service..."
@@ -264,7 +286,7 @@ systemctl --user --now enable app-dev.lizardbyte.app.Sunshine
 success "Sunshine systemd user service enabled and started."
 
 # ------------------------------------------------------------
-# 9. Final status
+# 8. Final status
 # ------------------------------------------------------------
 
 echo
@@ -291,5 +313,5 @@ info "Sunshine service status:"
 systemctl --user --no-pager --full status app-dev.lizardbyte.app.Sunshine || true
 
 echo
-warn "A reboot is recommended so the new input-group membership and"
-warn "system-wide lid/logind configuration are fully applied."
+warn "A reboot is recommended so the new system-wide lid/logind"
+warn "configuration is fully applied."
