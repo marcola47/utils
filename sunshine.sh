@@ -14,8 +14,6 @@
 #   - Ignore laptop lid close
 #   - Disable suspend/DPMS while on AC
 #   - UFW IPv4/IPv6 Sunshine streaming ports
-#
-# Safe to run repeatedly.
 # ============================================================
 
 set -Eeuo pipefail
