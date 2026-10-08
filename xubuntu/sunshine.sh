@@ -12,6 +12,7 @@
 #   - XFCE autostart for Sunshine
 #   - Ignore laptop lid close
 #   - Disable suspend/DPMS while on AC
+#   - Disable screen locking
 #   - UFW IPv4/IPv6 Sunshine streaming ports
 # ============================================================
 
@@ -171,7 +172,15 @@ xfconf-query -c xfce4-power-manager \
     -p /xfce4-power-manager/lid-action-on-ac \
     -n -t uint -s 0
 
-success "XFCE sleep/DPMS disabled while on AC."
+xfconf-query -c xfce4-screensaver \
+    -p /lock-enabled \
+    -n -t bool -s false
+
+xfconf-query -c xfce4-power-manager \
+    -p /xfce4-power-manager/lock-screen-suspend-hibernate \
+    -n -t bool -s false
+
+success "XFCE sleep/DPMS and screen locking disabled."
 
 # ------------------------------------------------------------
 # UFW
