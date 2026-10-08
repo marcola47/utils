@@ -148,6 +148,19 @@ info "Configuring XFCE power management..."
 command -v xfconf-query >/dev/null ||
     die "xfconf-query was not found."
 
+set_xfconf_value() {
+    local channel="$1"
+    local property="$2"
+    local type="$3"
+    local value="$4"
+
+    if xfconf-query -c "$channel" -p "$property" >/dev/null 2>&1; then
+        xfconf-query -c "$channel" -p "$property" -t "$type" -s "$value"
+    else
+        xfconf-query -c "$channel" -p "$property" -n -t "$type" -s "$value"
+    fi
+}
+
 xfconf-query -c xfce4-power-manager \
     -p /xfce4-power-manager/inactivity-on-ac \
     -n -t int -s 0
@@ -172,9 +185,8 @@ xfconf-query -c xfce4-power-manager \
     -p /xfce4-power-manager/lid-action-on-ac \
     -n -t uint -s 0
 
-xfconf-query -c xfce4-screensaver \
-    -p /lock-enabled \
-    -n -t bool -s false
+set_xfconf_value xfce4-screensaver /saver/idle-activation/enabled bool false
+set_xfconf_value xfce4-screensaver /lock/enabled bool false
 
 xfconf-query -c xfce4-power-manager \
     -p /xfce4-power-manager/lock-screen-suspend-hibernate \
